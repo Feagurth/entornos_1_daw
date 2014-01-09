@@ -50,7 +50,6 @@ Partial Class Principal
         Me.lblPalabraDescubierta.Name = "lblPalabraDescubierta"
         Me.lblPalabraDescubierta.Size = New System.Drawing.Size(310, 23)
         Me.lblPalabraDescubierta.TabIndex = 1
-        Me.lblPalabraDescubierta.Text = "Label1"
         Me.lblPalabraDescubierta.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'txtIntroduceLetra
@@ -99,7 +98,7 @@ Partial Class Principal
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(379, 392)
+        Me.ClientSize = New System.Drawing.Size(375, 392)
         Me.Controls.Add(Me.Navegador)
         Me.Controls.Add(Me.lstListaLetras)
         Me.Controls.Add(Me.lblEstado)
