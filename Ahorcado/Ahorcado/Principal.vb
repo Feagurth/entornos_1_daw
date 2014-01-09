@@ -1,5 +1,7 @@
 ﻿Public Class Principal
 
+#Region "Declaraciones"
+
     ''' <summary>
     ''' Enumerador que permite controlar el estado actual del juego
     ''' </summary>
@@ -10,10 +12,70 @@
         CONTINUAR = 0
     End Enum
 
+    ' Varible para controlar el estado actual del juego
     Dim estadoJuego As Estado
+
+    ' Variable para alamacenar la palabra a adivinar
     Dim strPalabra As String
+
+    ' Variable para almacenar lo que lleva el jugador adivinado de la 
+    ' palabra a adivinar
     Dim strPalabraAdivinada As String = String.Empty
+
+    ' Variable para almacenar la cantidad de errores que tiene
+    ' el usuario
     Dim intNumErrores As Integer = 0
+
+#End Region
+
+ #Region "Funciones y métodos de apoyo"
+
+    ''' <summary>
+    ''' Método para buscar una palabra por internet e introducirla en el juego del ahorcado
+    ''' </summary>
+    ''' <remarks>El tratamiento de la web se realiza en Navegador_DocumentCompleted</remarks>
+    Private Sub BuscarPalabra()
+
+        ' Cargamos en el navegador la página web que genera palabras aleatorias
+        Navegador.Navigate("http://www.palabrasque.com/palabra-aleatoria.php")
+
+        ' Definimos que no queremos que salten los posibles errores en la web
+        Navegador.ScriptErrorsSuppressed = True
+
+    End Sub
+
+    ''' <summary>
+    ''' Función para validar la letra introducida como que es una letra y no un caracter raro o un número
+    ''' </summary>
+    ''' <param name="strCadena">Letra a validar</param>
+    ''' <returns>Verdadero si es una letra y falso si no lo es</returns>
+    ''' <remarks></remarks>
+    Private Function ValidacionLetra(ByVal strCadena As String)
+        ' Variable que devolverá el resultado de la función
+        Dim resultado As Boolean = True
+
+        ' Si se ha introducido más de un caracter, la letra no es válida
+        If strCadena.Length > 1 Then
+            resultado = False
+        End If
+
+        ' Si el caracter es un número, no es válido
+        If IsNumeric(strCadena) Then
+            resultado = False
+        End If
+
+        ' Si el caracter no es parte del abecedario, no es válido
+        If "abcdefghijklmnñopqrstuvwxyz".IndexOf(strCadena) = -1 Then
+            resultado = False
+        End If
+
+        ' Devolvemos el resultado de la validación
+        Return resultado
+    End Function
+
+#End Region
+
+#Region "Eventos de los objetos del formulario"
 
     ''' <summary>
     ''' Evento del formulario principal
@@ -34,41 +96,16 @@
     End Sub
 
     ''' <summary>
-    ''' Método para buscar una palabra por internet e introducirla en el juego del ahorcado
+    ''' Evento click del boton
     ''' </summary>
-    ''' <remarks>El tratamiento de la web se realiza en Navegador_DocumentCompleted</remarks>
-    Private Sub BuscarPalabra()
-        Navegador.Navigate("http://www.palabrasque.com/palabra-aleatoria.php")
-        Navegador.ScriptErrorsSuppressed = True
-
-    End Sub
-
-    ''' <summary>
-    ''' Función para validar la letra introducida como que es una letra y no un caracter raro o un número
-    ''' </summary>
-    ''' <param name="strCadena">Letra a validar</param>
-    ''' <returns>Verdadero si es una letra y falso si no lo es</returns>
+    ''' <param name="sender">Objeto que envía el evento</param>
+    ''' <param name="e">Parámetros del evento</param>
     ''' <remarks></remarks>
-    Private Function ValidacionLetra(ByVal strCadena As String)
-        Dim resultado As Boolean = True
-
-        If strCadena.Length > 1 Then
-            resultado = False
-        End If
-
-        If IsNumeric(strCadena) Then
-            resultado = False
-        End If
-
-        If "abcdefghijklmnñopqrstuvwxyz".IndexOf(strCadena) = -1 Then
-            resultado = False
-        End If
-
-        Return resultado
-    End Function
-
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnAñadir.Click
+    Private Sub btnAñadir_Click(sender As Object, e As EventArgs) Handles btnAñadir.Click
+        ' Variable para almacenar la letra  introducida por el jugador
         Dim strLetra As String
+
+        ' Variable de apoyo para la iteración del array
         Dim intApoyo As Integer = 0
 
         ' Verificamos que se ha introducido algo en el textbox
@@ -187,6 +224,12 @@
         End If
     End Sub
 
+    ''' <summary>
+    ''' Evento del webbrowser para cuando ha terminado de cargar una página web
+    ''' </summary>
+    ''' <param name="sender">Objeto que envía el evento</param>
+    ''' <param name="e">Argumentos del evento</param>
+    ''' <remarks></remarks>
     Private Sub Navegador_DocumentCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs) Handles Navegador.DocumentCompleted
 
         ' Una vez cargada la página, volcamos la estructura de la misma en una cadena
@@ -237,4 +280,7 @@
         txtIntroduceLetra.Enabled = True
 
     End Sub
+
+#End Region
+
 End Class
