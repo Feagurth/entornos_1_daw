@@ -210,16 +210,18 @@
             ' Limpiamos y buscamos una nueva palabra para jugar
             lstListaLetras.Items.Clear()
             picImagen.Image = My.Resources._00
+            intNumErrores = 0
             BuscarPalabra()
         End If
 
         If estadoJuego = Estado.PIERDO Then
             ' Mostramos un mensaje de información
-            MsgBox("Perdiste", MsgBoxStyle.Critical, "You Lose")
+            MsgBox("Perdiste" + vbCrLf + "La palabra a buscar era: " + strPalabra, MsgBoxStyle.Critical, "You Lose")
 
             ' Limpiamos y buscamos una nueva palabra para jugar
             lstListaLetras.Items.Clear()
             picImagen.Image = My.Resources._00
+            intNumErrores = 0
             BuscarPalabra()
         End If
     End Sub
@@ -250,7 +252,7 @@
         strPalabra = cadena.Substring(valor1 + fijacion1.Length, valor2 - fijacion2.Length - valor1).ToLower
 
         ' Cambiamos los carácteres con acentos, por los mismos sin acentos para facilitar el juego
-        strPalabra.Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u")
+        strPalabra = strPalabra.Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u")
 
         ' Limpiamos controles y variables
         lblPalabraDescubierta.Text = String.Empty
