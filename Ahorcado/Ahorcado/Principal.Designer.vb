@@ -22,25 +22,16 @@ Partial Class Principal
     'No lo modifique con el editor de código.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.picImagen = New System.Windows.Forms.PictureBox()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Principal))
         Me.lblPalabraDescubierta = New System.Windows.Forms.Label()
         Me.txtIntroduceLetra = New System.Windows.Forms.TextBox()
         Me.btnAñadir = New System.Windows.Forms.Button()
         Me.lblEstado = New System.Windows.Forms.Label()
         Me.lstListaLetras = New System.Windows.Forms.ListBox()
         Me.Navegador = New System.Windows.Forms.WebBrowser()
+        Me.picImagen = New System.Windows.Forms.PictureBox()
         CType(Me.picImagen, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
-        '
-        'picImagen
-        '
-        Me.picImagen.Image = Global.WindowsApplication1.My.Resources.Resources._00
-        Me.picImagen.Location = New System.Drawing.Point(12, 58)
-        Me.picImagen.Name = "picImagen"
-        Me.picImagen.Size = New System.Drawing.Size(310, 283)
-        Me.picImagen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.picImagen.TabIndex = 0
-        Me.picImagen.TabStop = False
         '
         'lblPalabraDescubierta
         '
@@ -94,6 +85,16 @@ Partial Class Principal
         Me.Navegador.Size = New System.Drawing.Size(250, 250)
         Me.Navegador.TabIndex = 6
         '
+        'picImagen
+        '
+        Me.picImagen.Image = Global.WindowsApplication1.My.Resources.Resources._00
+        Me.picImagen.Location = New System.Drawing.Point(12, 58)
+        Me.picImagen.Name = "picImagen"
+        Me.picImagen.Size = New System.Drawing.Size(310, 283)
+        Me.picImagen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.picImagen.TabIndex = 0
+        Me.picImagen.TabStop = False
+        '
         'Principal
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -106,6 +107,7 @@ Partial Class Principal
         Me.Controls.Add(Me.txtIntroduceLetra)
         Me.Controls.Add(Me.lblPalabraDescubierta)
         Me.Controls.Add(Me.picImagen)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.Name = "Principal"
         Me.Text = "Ahorcado"

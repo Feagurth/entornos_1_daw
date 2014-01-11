@@ -28,7 +28,7 @@
 
 #End Region
 
- #Region "Funciones y métodos de apoyo"
+#Region "Funciones y métodos de apoyo"
 
     ''' <summary>
     ''' Método para buscar una palabra por internet e introducirla en el juego del ahorcado
@@ -72,6 +72,33 @@
         ' Devolvemos el resultado de la validación
         Return resultado
     End Function
+
+    ''' <summary>
+    ''' Función que reinicia los controles gráficos antes de iniciar un  nuevo juego
+    ''' </summary>
+    ''' <remarks></remarks>
+    Private Sub ReiniciarJuego()
+        ' Limpiamos la lista de letras introducidas
+        lstListaLetras.Items.Clear()
+
+        ' Cargamos la imagen inicial
+        picImagen.Image = My.Resources._00
+
+        ' Reiniciamos la variable que controla el número de errores
+        intNumErrores = 0
+
+        ' Limpiamos el label que muestra la palabra descubierta en el juego anterior
+        lblPalabraDescubierta.Text = String.Empty
+
+        ' Deshabilitamos el textbox que sirve para introducir letras
+        txtIntroduceLetra.Enabled = False
+
+        ' Deshabilitamos el boton para añadir letras
+        btnAñadir.Enabled = False
+
+        ' Buscamos una palabra nueva
+        BuscarPalabra()
+    End Sub
 
 #End Region
 
@@ -202,27 +229,25 @@
         'Limpiamos el textbox
         txtIntroduceLetra.Text = String.Empty
 
+        ' Pasamos el foco al textbox
+        txtIntroduceLetra.Focus()
+
+
         ' Si el estado del juego es GANO, el jugador ha ganado
         If estadoJuego = Estado.GANO Then
             ' Mostramos un mensaje de información
             MsgBox("Ganaste", MsgBoxStyle.Information, "You Win")
 
-            ' Limpiamos y buscamos una nueva palabra para jugar
-            lstListaLetras.Items.Clear()
-            picImagen.Image = My.Resources._00
-            intNumErrores = 0
-            BuscarPalabra()
+            ' Reiniciamos el juego
+            ReiniciarJuego()
         End If
 
         If estadoJuego = Estado.PIERDO Then
             ' Mostramos un mensaje de información
             MsgBox("Perdiste" + vbCrLf + "La palabra a buscar era: " + strPalabra, MsgBoxStyle.Critical, "You Lose")
 
-            ' Limpiamos y buscamos una nueva palabra para jugar
-            lstListaLetras.Items.Clear()
-            picImagen.Image = My.Resources._00
-            intNumErrores = 0
-            BuscarPalabra()
+            ' Reiniciamos el juego
+            ReiniciarJuego()
         End If
     End Sub
 
@@ -243,44 +268,52 @@
 
         ' Definimos la posición de la fijación 1
         Dim valor1 As Integer = cadena.IndexOf(fijacion1)
-        ' Definimos la posición de la fijación 2 que irá despues de la fijación 1
-        Dim valor2 As Integer = cadena.IndexOf(fijacion2, valor1)
 
-        ' La palabra será la cadena entre la posición de la fijacación 1 + su tamaño y 
-        ' la posición de la fijación 2 menos su tamaño y menos la posición de la fijación1
-        ' Asignamos la palabra parseada a la variable global que guarda la palabra a adivinar
-        strPalabra = cadena.Substring(valor1 + fijacion1.Length, valor2 - fijacion2.Length - valor1).ToLower
+        ' Verificamos si la página de donde cargamos las nuevas palabras se ha cargado correctamente
+        ' Si no encontramos la primera fijación podemos asegurar que la página no se ha cargado tal y 
+        ' como esperábamos...
+        If (valor1 <> -1) Then
 
-        ' Cambiamos los carácteres con acentos, por los mismos sin acentos para facilitar el juego
-        strPalabra = strPalabra.Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u")
+            ' Definimos la posición de la fijación 2 que estára siempre a continuación de la fijación 1
+            Dim valor2 As Integer = cadena.IndexOf(fijacion2, valor1)
 
-        ' Limpiamos controles y variables
-        lblPalabraDescubierta.Text = String.Empty
-        strPalabraAdivinada = String.Empty
-        lstListaLetras.Items.Clear()
+            ' La palabra será la cadena entre la posición de la fijacación 1 + su tamaño y 
+            ' la posición de la fijación 2 menos su tamaño y menos la posición de la fijación1
+            ' Asignamos la palabra parseada a la variable global que guarda la palabra a adivinar
+            strPalabra = cadena.Substring(valor1 + fijacion1.Length, valor2 - fijacion2.Length - valor1).ToLower
 
-        ' Creamos la variables que almacenará lo que lleva el jugador adivinado de la palabra
-        ' iterando los caracteres de la palabra a adivinar e añadiendo el caracter _ por cada posición
-        For Each letra As String In strPalabra
-            strPalabraAdivinada = strPalabraAdivinada + "_"
-        Next
+            ' Cambiamos los carácteres con acentos, por los mismos sin acentos para facilitar el juego
+            strPalabra = strPalabra.Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u")
 
-        ' En el caso del label que muestra la palabra que lleva adivinada el usuario hacemos lo mismo
-        ' con un bucle for, pero añadimos _ con un espacio
-        For i As Integer = 0 To strPalabraAdivinada.Length - 1
-            lblPalabraDescubierta.Text = lblPalabraDescubierta.Text + "_ "
-        Next
+            ' Limpiamos controles y variables
+            lblPalabraDescubierta.Text = String.Empty
+            strPalabraAdivinada = String.Empty
+            lstListaLetras.Items.Clear()
 
-        ' Cambiamos el estado del juego a continuar
-        estadoJuego = Estado.CONTINUAR
+            ' Creamos la variables que almacenará lo que lleva el jugador adivinado de la palabra
+            ' iterando los caracteres de la palabra a adivinar e añadiendo el caracter _ por cada posición
+            For Each letra As String In strPalabra
+                strPalabraAdivinada = strPalabraAdivinada + "_"
+            Next
 
-        ' Cambiamos la etiqueta de estado
-        lblEstado.Text = estadoJuego.ToString
+            ' En el caso del label que muestra la palabra que lleva adivinada el usuario hacemos lo mismo
+            ' con un bucle for, pero añadimos _ con un espacio
+            For i As Integer = 0 To strPalabraAdivinada.Length - 1
+                lblPalabraDescubierta.Text = lblPalabraDescubierta.Text + "_ "
+            Next
 
-        ' Habiliamos el boton y el textbox que permite jugar al usuario
-        btnAñadir.Enabled = True
-        txtIntroduceLetra.Enabled = True
+            ' Cambiamos el estado del juego a continuar
+            estadoJuego = Estado.CONTINUAR
 
+            ' Cambiamos la etiqueta de estado
+            lblEstado.Text = estadoJuego.ToString
+
+            ' Habiliamos el boton y el textbox que permite jugar al usuario
+            btnAñadir.Enabled = True
+            txtIntroduceLetra.Enabled = True
+        Else
+            MsgBox("No se ha podido generar una palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
+        End If
     End Sub
 
 #End Region
