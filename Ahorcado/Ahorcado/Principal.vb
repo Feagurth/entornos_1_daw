@@ -1,4 +1,10 @@
-﻿Public Class Principal
+﻿''' <summary>
+''' Clase principal del juego del ahorcado
+''' By.- Luis Cabrerizo Gomez
+''' LuisCabrerizoGomez@gmail.com
+''' </summary>
+''' <remarks></remarks>
+Public Class Principal
 
 #Region "Declaraciones"
 
@@ -140,11 +146,11 @@
             ' Pasamos el valor introducido a minúsculas
             strLetra = txtIntroduceLetra.Text.ToLower
 
-            ' Verificamos si la letra introducida ya ha sido jugada anteriormente
-            If lstListaLetras.Items.Contains(strLetra.ToUpper) = False Then
+            ' Validamos si el caracter es una letra
+            If ValidacionLetra(strLetra) Then
 
-                ' Validamos si el caracter es una letra
-                If ValidacionLetra(strLetra) Then
+                ' Verificamos si la letra introducida ya ha sido jugada anteriormente
+                If lstListaLetras.Items.Contains(strLetra.ToUpper) = False Then
 
                     ' Si es una letra y no se ha jugado antes la añadimos a la lista de
                     ' letras jugadas
@@ -214,13 +220,15 @@
 
                     End If
                 Else
-                    ' Mostramos un mensaje avisando que el carácter introducido no es valido
-                    MsgBox("No es un caracter válido", MsgBoxStyle.Exclamation, "Atención")
+                    ' Mostramos un mensaje avisando que el caracter introducido ya se ha usado anteriomente
+                    MsgBox("Esa letra ya ha sido introducida", MsgBoxStyle.Exclamation, "Atención")
                 End If
             Else
-                ' Mostramos un mensaje avisando que el caracter introducido ya se ha usado anteriomente
-                MsgBox("Esa letra ya ha sido introducida", MsgBoxStyle.Exclamation, "Atención")
+                ' Mostramos un mensaje avisando que el carácter introducido no es valido
+                MsgBox("No es un caracter válido", MsgBoxStyle.Exclamation, "Atención")
             End If
+        Else
+            MsgBox("Debe introducir una letra para poder jugar", MsgBoxStyle.Exclamation, "Atención")
         End If
 
         ' Cambiamos el label que muestra el estado del juego
@@ -314,6 +322,7 @@
         Else
             MsgBox("No se ha podido generar una palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
         End If
+
     End Sub
 
 #End Region

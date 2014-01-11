@@ -129,15 +129,5 @@ Namespace My.Resources
                 Return CType(obj,System.Drawing.Bitmap)
             End Get
         End Property
-        
-        '''<summary>
-        '''  Busca un recurso adaptado de tipo System.Drawing.Icon similar a (Icono).
-        '''</summary>
-        Friend ReadOnly Property ahorcado() As System.Drawing.Icon
-            Get
-                Dim obj As Object = ResourceManager.GetObject("ahorcado", resourceCulture)
-                Return CType(obj,System.Drawing.Icon)
-            End Get
-        End Property
     End Module
 End Namespace
