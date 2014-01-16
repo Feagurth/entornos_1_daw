@@ -82,7 +82,7 @@ Partial Class Principal
         Me.Navegador.Location = New System.Drawing.Point(445, 37)
         Me.Navegador.MinimumSize = New System.Drawing.Size(20, 20)
         Me.Navegador.Name = "Navegador"
-        Me.Navegador.Size = New System.Drawing.Size(250, 250)
+        Me.Navegador.Size = New System.Drawing.Size(532, 392)
         Me.Navegador.TabIndex = 6
         '
         'picImagen
@@ -99,7 +99,7 @@ Partial Class Principal
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(375, 392)
+        Me.ClientSize = New System.Drawing.Size(372, 391)
         Me.Controls.Add(Me.Navegador)
         Me.Controls.Add(Me.lstListaLetras)
         Me.Controls.Add(Me.lblEstado)
