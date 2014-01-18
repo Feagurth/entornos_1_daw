@@ -30,6 +30,7 @@ Partial Class Principal
         Me.lstListaLetras = New System.Windows.Forms.ListBox()
         Me.Navegador = New System.Windows.Forms.WebBrowser()
         Me.picImagen = New System.Windows.Forms.PictureBox()
+        Me.lblMarcador = New System.Windows.Forms.Label()
         CType(Me.picImagen, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
@@ -95,11 +96,22 @@ Partial Class Principal
         Me.picImagen.TabIndex = 0
         Me.picImagen.TabStop = False
         '
+        'lblMarcador
+        '
+        Me.lblMarcador.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.lblMarcador.Font = New System.Drawing.Font("Segoe Marker", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lblMarcador.Location = New System.Drawing.Point(328, 16)
+        Me.lblMarcador.Name = "lblMarcador"
+        Me.lblMarcador.Size = New System.Drawing.Size(41, 23)
+        Me.lblMarcador.TabIndex = 7
+        Me.lblMarcador.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
         'Principal
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(372, 391)
+        Me.Controls.Add(Me.lblMarcador)
         Me.Controls.Add(Me.Navegador)
         Me.Controls.Add(Me.lstListaLetras)
         Me.Controls.Add(Me.lblEstado)
@@ -123,5 +135,6 @@ Partial Class Principal
     Friend WithEvents lblEstado As System.Windows.Forms.Label
     Friend WithEvents lstListaLetras As System.Windows.Forms.ListBox
     Friend WithEvents Navegador As System.Windows.Forms.WebBrowser
+    Friend WithEvents lblMarcador As System.Windows.Forms.Label
 
 End Class

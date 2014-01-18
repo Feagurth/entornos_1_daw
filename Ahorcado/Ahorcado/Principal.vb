@@ -1,4 +1,6 @@
-﻿''' <summary>
+﻿Imports System.Net
+
+''' <summary>
 ''' Clase principal del juego del ahorcado
 ''' By.- Luis Cabrerizo Gomez
 ''' LuisCabrerizoGomez@gmail.com
@@ -24,6 +26,10 @@ Public Class Principal
     ' Variable para alamacenar la palabra a adivinar
     Dim strPalabra As String
 
+    ' Variables para llevar la puntuación del juego
+    Dim partidasJugadas As Integer = 0
+    Dim partidasGanadas As Integer = 0
+
     ' Variable para almacenar lo que lleva el jugador adivinado de la 
     ' palabra a adivinar
     Dim strPalabraAdivinada As String = String.Empty
@@ -42,18 +48,34 @@ Public Class Principal
     ''' <remarks>El tratamiento de la web se realiza en Navegador_DocumentCompleted</remarks>
     Private Sub BuscarPalabra()
 
-        ' Pedimos una palabra para adivinar al usuario
-        strPalabra = InputBox("Introduzca una palabra para adivinar. Pulse cancelar o no introduzca nada para generarla aleatoriamente", "Petición de palabra", String.Empty)
+        ' Comprobamos si hay conexión a Internet para usar el servicio de validación o la generación de palabras aleatorias
+        If (VerificarConexionInternet()) Then
 
-        ' Si el usuario no introduce palabra
-        If (strPalabra = String.Empty) Then
-            ' Cargamos en el navegador la página web que genera palabras aleatorias
-            Navegador.Navigate("http://www.palabrasque.com/palabra-aleatoria.php")
+            ' Hay conexión. Pedimos una palabra para adivinar al usuario
+            strPalabra = InputBox("Introduzca una palabra para adivinar. Pulse cancelar o no introduzca nada para generarla aleatoriamente", "Petición de palabra", String.Empty)
 
-            ' Definimos que no queremos que salten los posibles errores en la web
-            Navegador.ScriptErrorsSuppressed = True
+            ' Si el usuario no introduce palabra
+            If (strPalabra = String.Empty) Then
+                ' Cargamos en el navegador la página web que genera palabras aleatorias
+                Navegador.Navigate("http://www.palabrasque.com/palabra-aleatoria.php")
+
+                ' Definimos que no queremos que salten los posibles errores en la web
+                Navegador.ScriptErrorsSuppressed = True
+            Else
+                ValidacionPalabra()
+            End If
         Else
-            ValidacionPalabra()
+            ' No hay conexión. Mostramos un mensaje al respecto avisando al usuario
+            MsgBox("No se ha derectado conexión a internet" + vbCrLf + "No se podrán validar palabras ni generarlas aleatoriamente", MsgBoxStyle.Exclamation, "Atención!")
+
+            ' Pedimos una palabra 
+            strPalabra = InputBox("Introduzca una palabra para adivinar. Pulse cancelar o no introduzca nada para finalizar el juego", "Petición de palabra", String.Empty)
+
+            If (strPalabra <> String.Empty) Then
+                IniciarJuego()
+            Else
+                End
+            End If
         End If
 
     End Sub
@@ -75,68 +97,81 @@ Public Class Principal
         ' puesto que la web devuelve un fichero JSON y no es tratable con el webbrowser
         Dim req As Net.HttpWebRequest = Net.WebRequest.Create("http://api.apalabrados.com/api/dictionaries/ES?words=" + strPalabra)
 
-        ' Hacemos la petición y recogemos la respuesta
-        Dim response As Net.WebResponse = req.GetResponse
+        ' Establecemos un timeout para que, en el caso de no haber conexión a internet se de un aviso
+        req.Timeout = 5000
 
-        ' Definimos un flujo de datos y volamos el flujo de datos de la respuesta
-        Dim stream As System.IO.Stream = response.GetResponseStream
+        Try
+            ' Hacemos la petición y recogemos la respuesta
+            Dim response As Net.WebResponse = req.GetResponse
 
-        ' Creamos un buffer de bytes para leer la resupesta
-        Dim buffer As Byte() = New Byte(1000) {}
+            ' Definimos un flujo de datos y volamos el flujo de datos de la respuesta
+            Dim stream As System.IO.Stream = response.GetResponseStream
 
-        ' Creamos una lista de bytes para almacenar la respuesta
-        Dim data As New List(Of Byte)
+            ' Creamos un buffer de bytes para leer la resupesta
+            Dim buffer As Byte() = New Byte(1000) {}
 
-        ' Comenzamos a leer el flujo de datos
-        Dim bytesRead = stream.Read(buffer, 0, buffer.Length)
+            ' Creamos una lista de bytes para almacenar la respuesta
+            Dim data As New List(Of Byte)
 
-        ' Iteramos hasta que no tengamos nada más que leer
-        Do Until bytesRead = 0
-            For i = 0 To bytesRead - 1
-                ' A cada iteración vamos añadiendo la información
-                ' A la lista de bytes
-                data.Add(buffer(i))
-            Next
+            ' Comenzamos a leer el flujo de datos
+            Dim bytesRead = stream.Read(buffer, 0, buffer.Length)
 
-            bytesRead = stream.Read(buffer, 0, buffer.Length)
-        Loop
+            ' Iteramos hasta que no tengamos nada más que leer
+            Do Until bytesRead = 0
+                For i = 0 To bytesRead - 1
+                    ' A cada iteración vamos añadiendo la información
+                    ' A la lista de bytes
+                    data.Add(buffer(i))
+                Next
 
-        ' Volcamos la información recopilada en una cadena para su 
-        ' tratamiento posterior
-        Dim cadena = System.Text.Encoding.UTF8.GetString(data.ToArray)
+                bytesRead = stream.Read(buffer, 0, buffer.Length)
+            Loop
 
-        ' Cerramos objetos
-        response.Close()
-        stream.Close()
+            ' Volcamos la información recopilada en una cadena para su 
+            ' tratamiento posterior
+            Dim cadena = System.Text.Encoding.UTF8.GetString(data.ToArray)
 
-        ' Definimos los puntos entre los que se encuentra la palabra aleatoria en la página
-        Dim fijacion1 As String = "{""ok"":["
-        Dim fijacion2 As String = """],""wrong"":["
+            ' Cerramos objetos
+            response.Close()
+            stream.Close()
 
-        ' Definimos la posición de la fijación 1
-        Dim valor1 As Integer = cadena.IndexOf(fijacion1)
+            ' Definimos los puntos entre los que se encuentra la palabra aleatoria en la página
+            Dim fijacion1 As String = "{""ok"":["
+            Dim fijacion2 As String = """],""wrong"":["
+
+            ' Definimos la posición de la fijación 1
+            Dim valor1 As Integer = cadena.IndexOf(fijacion1)
+
+            ' Si valor1 es igual a -1 no se ha podido cargar la página de validación de forma correcta
+            If (valor1 <> -1) Then
+                ' Definimos la posición de la fijación 2 que estára siempre a continuación de la fijación 1
+                Dim valor2 As Integer = cadena.IndexOf(fijacion2, valor1)
 
 
-        ' Si valor1 es igual a -1 la palabra no existe y no es jugable. Si es distinta de -1 se ha cargado la página bien y la palabra está validada
-        If (valor1 <> -1) Then
-            ' Definimos la posición de la fijación 2 que estára siempre a continuación de la fijación 1
-            Dim valor2 As Integer = cadena.IndexOf(fijacion2, valor1)
-
-            ' La palabra será la cadena entre la posición de la fijacación 1 + su tamaño y 
-            ' la posición de la fijación 2 menos su tamaño y menos la posición de la fijación1
-            ' Asignamos la palabra parseada a la variable global que guarda la palabra a adivinar
-            If cadena.Substring(valor1 + fijacion1.Length, valor2 - (valor1 + fijacion1.Length)) <> String.Empty Then
-                ' Si dentro de los rangos de las fijaciones hay texto, la palabra es correcta
-                ' e iniciamos el juego
-                IniciarJuego()
+                If (valor2 <> -1) Then
+                    ' La palabra será la cadena entre la posición de la fijacación 1 + su tamaño y 
+                    ' la posición de la fijación 2 menos su tamaño y menos la posición de la fijación1
+                    ' Asignamos la palabra parseada a la variable global que guarda la palabra a adivinar
+                    If cadena.Substring(valor1 + fijacion1.Length, valor2 - (valor1 + fijacion1.Length)) <> String.Empty Then
+                        ' Si dentro de los rangos de las fijaciones hay texto, la palabra es correcta
+                        ' e iniciamos el juego
+                        IniciarJuego()
+                    Else
+                        ' Si sale cualquier otra cosa rara, es un fallo en la comunicación con la web
+                        MsgBox("No se ha podido validar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
+                    End If
+                Else
+                    MsgBox("La palabra introducida no es válida" + vbCrLf + "Escriba una nueva palabra a continuación", MsgBoxStyle.Exclamation, "Palabra incorrecta")
+                    BuscarPalabra()
+                End If
             Else
-                ' Si sale cualquier otra cosa rara, es un fallo en la comunicación con la web
                 MsgBox("No se ha podido validar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
             End If
-        Else
-            MsgBox("La palabra introducida no es válida" + vbCrLf + "Escriba una nueva palabra a continuación", MsgBoxStyle.Exclamation, "Palabra incorrecta")
-            BuscarPalabra()
-        End If
+        Catch ex As Exception
+            MsgBox("No se ha podido establecer conexión con el servicio de validación" + vbCrLf + "Póngase en contacto con el administrador", MsgBoxStyle.Critical, "Error!")
+        End Try
+
+
     End Sub
 
     ''' <summary>
@@ -239,10 +274,37 @@ Public Class Principal
         ' Cambiamos la etiqueta de estado
         lblEstado.Text = estadoJuego.ToString
 
-        ' Habiliamos el boton y el textbox que permite jugar al usuario
+        ' Habiliamos el boton y el textbox que permite jugar al usuario y pasamos el foco al cuadro de texto
         btnAñadir.Enabled = True
         txtIntroduceLetra.Enabled = True
+        txtIntroduceLetra.Focus()
+
     End Sub
+
+    ''' <summary>
+    ''' Función para verificar si hay una conexión activa a Interent
+    ''' </summary>
+    ''' <returns>Verdadero si hay conexión, falso si no la hay</returns>
+    ''' <remarks>Se usa un objeto WebClient que intenta cargar la página Google.com</remarks>
+    Public Shared Function VerificarConexionInternet() As Boolean
+
+        ' Basamos la verificación en si podemos acceder a Google.com.
+        Try
+            ' Declaramos un nuevo objeto WebClient
+            Using client = New WebClient()
+
+                ' Creamos un objeto stream e intentamos leer la información de Google.com
+                Using stream = client.OpenRead("http://www.google.com")
+                    ' Si se puede leer, hay conexión a Internet y devolvemos Verdadero
+                    Return True
+                End Using
+            End Using
+        Catch
+            ' Si da un error, es que no podemos acceder a la página y por tanto no tenemos conexión
+            ' Devolvemos Falso en este caso
+            Return False
+        End Try
+    End Function
 
 #End Region
 
@@ -260,9 +322,11 @@ Public Class Principal
         btnAñadir.Enabled = False
         txtIntroduceLetra.Enabled = False
 
+        'Inicializamos el marcador
+        lblMarcador.Text = partidasGanadas.ToString() + " \ " + partidasJugadas.ToString()
+
         ' Buscamos una palabra por internet para adivinar
         BuscarPalabra()
-
 
     End Sub
 
@@ -381,6 +445,14 @@ Public Class Principal
 
         ' Si el estado del juego es GANO, el jugador ha ganado
         If estadoJuego = Estado.GANO Then
+
+            ' Aumentamos el número de partidas jugadas y ganadas
+            partidasGanadas = partidasGanadas + 1
+            partidasJugadas = partidasJugadas + 1
+
+            'Actualizamos el marcador
+            lblMarcador.Text = partidasGanadas.ToString() + " \ " + partidasJugadas.ToString()
+
             ' Mostramos un mensaje de información
             MsgBox("Ganaste", MsgBoxStyle.Information, "You Win")
 
@@ -389,6 +461,13 @@ Public Class Principal
         End If
 
         If estadoJuego = Estado.PIERDO Then
+
+            ' Aumentamos el número de partidas jugadas
+            partidasJugadas = partidasJugadas + 1
+
+            'Actualizamos el marcador
+            lblMarcador.Text = partidasGanadas.ToString() + " \ " + partidasJugadas.ToString()
+
             ' Mostramos un mensaje de información
             MsgBox("Perdiste" + vbCrLf + "La palabra a buscar era: " + strPalabra, MsgBoxStyle.Critical, "You Lose")
 
@@ -439,14 +518,14 @@ Public Class Principal
         End If
     End Sub
 
+
     ''' <summary>
     ''' Evento que controla la pulsación de teclas en el cuadro de texto para introducir letras
     ''' </summary>
     ''' <param name="sender">Objeto que envia la petición</param>
     ''' <param name="e">Argumentos del evento</param>
     ''' <remarks></remarks>
-    Private Sub txtIntroduceLetra_KeyUp(sender As Object, e As KeyEventArgs) Handles txtIntroduceLetra.KeyUp
-
+    Private Sub txtIntroduceLetra_KeyDown(sender As Object, e As KeyEventArgs) Handles txtIntroduceLetra.KeyDown
         ' Comprobamos si la tecla que se suelta es el intro, 
         ' de ser así ejecutamso el evento del click del botón
         If e.KeyData = Keys.Enter Then
