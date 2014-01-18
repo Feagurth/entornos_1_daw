@@ -61,6 +61,7 @@ Public Class Principal
 
                 ' Definimos que no queremos que salten los posibles errores en la web
                 Navegador.ScriptErrorsSuppressed = True
+
             Else
                 ValidacionPalabra()
             End If
@@ -517,7 +518,6 @@ Public Class Principal
             MsgBox("No se ha podido generar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
         End If
     End Sub
-
 
     ''' <summary>
     ''' Evento que controla la pulsación de teclas en el cuadro de texto para introducir letras
