@@ -28,7 +28,6 @@ Partial Class Principal
         Me.btnAñadir = New System.Windows.Forms.Button()
         Me.lblEstado = New System.Windows.Forms.Label()
         Me.lstListaLetras = New System.Windows.Forms.ListBox()
-        Me.Navegador = New System.Windows.Forms.WebBrowser()
         Me.picImagen = New System.Windows.Forms.PictureBox()
         Me.lblMarcador = New System.Windows.Forms.Label()
         CType(Me.picImagen, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -47,9 +46,11 @@ Partial Class Principal
         'txtIntroduceLetra
         '
         Me.txtIntroduceLetra.Location = New System.Drawing.Point(12, 364)
+        Me.txtIntroduceLetra.MaxLength = 1
         Me.txtIntroduceLetra.Name = "txtIntroduceLetra"
         Me.txtIntroduceLetra.Size = New System.Drawing.Size(137, 20)
         Me.txtIntroduceLetra.TabIndex = 2
+        Me.txtIntroduceLetra.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'btnAñadir
         '
@@ -78,14 +79,6 @@ Partial Class Principal
         Me.lstListaLetras.Size = New System.Drawing.Size(41, 329)
         Me.lstListaLetras.TabIndex = 5
         '
-        'Navegador
-        '
-        Me.Navegador.Location = New System.Drawing.Point(445, 37)
-        Me.Navegador.MinimumSize = New System.Drawing.Size(20, 20)
-        Me.Navegador.Name = "Navegador"
-        Me.Navegador.Size = New System.Drawing.Size(532, 392)
-        Me.Navegador.TabIndex = 6
-        '
         'picImagen
         '
         Me.picImagen.Image = Global.WindowsApplication1.My.Resources.Resources._00
@@ -110,9 +103,8 @@ Partial Class Principal
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(372, 391)
+        Me.ClientSize = New System.Drawing.Size(376, 391)
         Me.Controls.Add(Me.lblMarcador)
-        Me.Controls.Add(Me.Navegador)
         Me.Controls.Add(Me.lstListaLetras)
         Me.Controls.Add(Me.lblEstado)
         Me.Controls.Add(Me.btnAñadir)
@@ -134,7 +126,6 @@ Partial Class Principal
     Friend WithEvents btnAñadir As System.Windows.Forms.Button
     Friend WithEvents lblEstado As System.Windows.Forms.Label
     Friend WithEvents lstListaLetras As System.Windows.Forms.ListBox
-    Friend WithEvents Navegador As System.Windows.Forms.WebBrowser
     Friend WithEvents lblMarcador As System.Windows.Forms.Label
 
 End Class

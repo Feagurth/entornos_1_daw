@@ -43,9 +43,34 @@ Public Class Principal
 #Region "Funciones y métodos de apoyo"
 
     ''' <summary>
+    ''' Función para verificar que la palabra introducida no tiene caracteres no válidos
+    ''' </summary>
+    ''' <param name="strPalabra">Palabra a validar</param>
+    ''' <returns>Verdadero si todos sus caracteres son válidos y Falso si no lo son</returns>
+    ''' <remarks></remarks>
+    Private Function validacionPalabrasRaras(ByVal strPalabra)
+
+        ' Iteramos por cada caracter de la palabra
+        For Each caracter As Char In strPalabra
+            ' Comprobamos si el caracter no se encuentra en la lista de 
+            ' caracteres permitidos
+            If ("abcdefghijklmnñopqrstuvwxyz".IndexOf(caracter) = -1) Then
+                ' Si no aparece, la palabra tiene caracteres inválidos y se
+                ' devuelve False para descartarla
+                Return False
+            End If
+        Next
+
+        ' Se devuelve True, puesto que la palabra está validada
+        Return True
+
+    End Function
+
+
+    ''' <summary>
     ''' Método para buscar una palabra por internet e introducirla en el juego del ahorcado
     ''' </summary>
-    ''' <remarks>El tratamiento de la web se realiza en Navegador_DocumentCompleted</remarks>
+    ''' <remarks></remarks>
     Private Sub BuscarPalabra()
 
         ' Comprobamos si hay conexión a Internet para usar el servicio de validación o la generación de palabras aleatorias
@@ -57,13 +82,21 @@ Public Class Principal
             ' Si el usuario no introduce palabra
             If (strPalabra = String.Empty) Then
                 ' Cargamos en el navegador la página web que genera palabras aleatorias
-                Navegador.Navigate("http://www.palabrasque.com/palabra-aleatoria.php")
+                Dim cadena = getWebPage("http://www.palabrasque.com/palabra-aleatoria.php", 5000)
 
-                ' Definimos que no queremos que salten los posibles errores en la web
-                Navegador.ScriptErrorsSuppressed = True
-
+                If (cadena <> String.Empty) Then
+                    parserPalabraAleatoria(cadena)
+                Else
+                    MsgBox("No se ha podido generar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
+                End If
             Else
-                ValidacionPalabra()
+                If (validacionPalabrasRaras(strPalabra)) Then
+                    ValidacionPalabra()
+                Else
+                    MsgBox("Se han detectado caracteres no válidos" + vbCrLf + "Introduzca una nueva palabra", MsgBoxStyle.Exclamation, "Atención!")
+                    BuscarPalabra()
+                End If
+
             End If
         Else
             ' No hay conexión. Mostramos un mensaje al respecto avisando al usuario
@@ -72,35 +105,44 @@ Public Class Principal
             ' Pedimos una palabra 
             strPalabra = InputBox("Introduzca una palabra para adivinar. Pulse cancelar o no introduzca nada para finalizar el juego", "Petición de palabra", String.Empty)
 
+            ' Comprobamos si la palabra no es vacia
             If (strPalabra <> String.Empty) Then
-                IniciarJuego()
+
+                ' Limpiamos la palabra de caracteres indeseados
+                strPalabra = LimpiarPalabra(strPalabra)
+
+                ' Verificamos si la palabra contiene caracteres no válidos
+                If (validacionPalabrasRaras(strPalabra)) Then
+                    ' Si todo está bien iniciamos el juego
+                    IniciarJuego()
+                Else
+                    MsgBox("Se han detectado caracteres no válidos" + vbCrLf + "Buscando una nueva palabra", MsgBoxStyle.Exclamation, "Atención!")
+                    ' Si no, buscamos nueva palabra
+                    BuscarPalabra()
+                End If
             Else
-                End
+                ' Si lo es, buscamos nueva palabra
+                BuscarPalabra()
             End If
         End If
-
     End Sub
 
     ''' <summary>
-    ''' Función que nos permite validar una palabra introducida por el usuario
-    ''' contra el API de apalabrados
+    ''' Función que nos permite recuperar el contenido de una página web
     ''' </summary>
-    ''' <remarks>
-    ''' Usamos HttpWebRequest en lugar del WebBrowser que hay en la aplicación por la
-    ''' imposibilidad que tiene de cargar datos JSON, puesto que en lugar de mostrarlos intenta descargarlos
-    ''' </remarks>
-    Private Sub ValidacionPalabra()
+    ''' <param name="url">URL de la página cuyo contenido se quiere obtener</param>
+    ''' <param name="timeOutMs">Tiempo de carga máximo de espera en milisegundos</param>
+    ''' <returns>El HTML de la página o una cadena vacia</returns>
+    ''' <remarks></remarks>
+    Private Function getWebPage(ByVal url, ByVal timeOutMs)
 
-        ' Limpiamos la palabra
-        strPalabra = LimpiarPalabra(strPalabra)
-
-        ' Creamos un objeto HttpWebRequest para poder comunicarnos con el API de la web de apalabrados
-        ' puesto que la web devuelve un fichero JSON y no es tratable con el webbrowser
-        Dim req As Net.HttpWebRequest = Net.WebRequest.Create("http://api.apalabrados.com/api/dictionaries/ES?words=" + strPalabra)
+        ' Creamos el objeto para realizar la petición web
+        Dim req As Net.HttpWebRequest = Net.WebRequest.Create(url)
 
         ' Establecemos un timeout para que, en el caso de no haber conexión a internet se de un aviso
-        req.Timeout = 5000
+        req.Timeout = timeOutMs
 
+        ' Intentamos recuperar la página web
         Try
             ' Hacemos la petición y recogemos la respuesta
             Dim response As Net.WebResponse = req.GetResponse
@@ -136,6 +178,33 @@ Public Class Principal
             response.Close()
             stream.Close()
 
+            Return cadena
+        Catch ex As Exception
+            ' En caso de fallar, se devuelve cadena vacia
+            Return String.Empty
+        End Try
+
+    End Function
+
+    ''' <summary>
+    ''' Función que nos permite validar una palabra introducida por el usuario
+    ''' contra el API de apalabrados
+    ''' </summary>
+    ''' <remarks>
+    ''' Usamos HttpWebRequest en lugar del WebBrowser que hay en la aplicación por la
+    ''' imposibilidad que tiene de cargar datos JSON, puesto que en lugar de mostrarlos intenta descargarlos
+    ''' </remarks>
+    Private Sub ValidacionPalabra()
+
+        ' Limpiamos la palabra
+        strPalabra = LimpiarPalabra(strPalabra)
+
+        ' Creamos un objeto HttpWebRequest para poder comunicarnos con el API de la web de apalabrados
+        ' puesto que la web devuelve un fichero JSON y no es tratable con el webbrowser
+        Dim cadena = getWebPage("http://api.apalabrados.com/api/dictionaries/ES?words=" + strPalabra, 5000)
+
+        ' Validamos si la petición de datos web ha tenido respuesta
+        If (cadena <> String.Empty) Then
             ' Definimos los puntos entre los que se encuentra la palabra aleatoria en la página
             Dim fijacion1 As String = "{""ok"":["
             Dim fijacion2 As String = """],""wrong"":["
@@ -168,9 +237,9 @@ Public Class Principal
             Else
                 MsgBox("No se ha podido validar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
             End If
-        Catch ex As Exception
+        Else
             MsgBox("No se ha podido establecer conexión con el servicio de validación" + vbCrLf + "Póngase en contacto con el administrador", MsgBoxStyle.Critical, "Error!")
-        End Try
+        End If
 
 
     End Sub
@@ -287,25 +356,46 @@ Public Class Principal
     ''' </summary>
     ''' <returns>Verdadero si hay conexión, falso si no la hay</returns>
     ''' <remarks>Se usa un objeto WebClient que intenta cargar la página Google.com</remarks>
-    Public Shared Function VerificarConexionInternet() As Boolean
-
+    Public Function VerificarConexionInternet() As Boolean
         ' Basamos la verificación en si podemos acceder a Google.com.
-        Try
-            ' Declaramos un nuevo objeto WebClient
-            Using client = New WebClient()
-
-                ' Creamos un objeto stream e intentamos leer la información de Google.com
-                Using stream = client.OpenRead("http://www.google.com")
-                    ' Si se puede leer, hay conexión a Internet y devolvemos Verdadero
-                    Return True
-                End Using
-            End Using
-        Catch
-            ' Si da un error, es que no podemos acceder a la página y por tanto no tenemos conexión
-            ' Devolvemos Falso en este caso
-            Return False
-        End Try
+        Return getWebPage("http://www.google.com", 5000) <> String.Empty
     End Function
+
+    ''' <summary>
+    ''' Método para recoger la información de la web de generación de palabras aleatorias y 
+    ''' recuperar la palabra para adivinar
+    ''' </summary>
+    ''' <param name="strCadena">Contenido HTML de la web de palabras alatorias</param>
+    ''' <remarks></remarks>
+    Private Sub parserPalabraAleatoria(ByRef strCadena)
+        ' Variables para almacenar los puntos de fijación para el tratamiento de la web
+        Dim fijacion1 As String
+        Dim fijacion2 As String
+
+        ' Definimos los puntos entre los que se encuentra la palabra aleatoria en la página
+        fijacion1 = "<br><font size=" + Chr(34) + "6" + Chr(34) + " /><strong>"
+        fijacion2 = "</strong></font>  </font></p>"
+
+        ' Definimos la posición de la fijación 1
+        Dim valor1 As Integer = strCadena.IndexOf(fijacion1)
+
+        ' Verificamos si la página de donde cargamos las nuevas palabras se ha cargado correctamente
+        ' Si no encontramos la primera fijación podemos asegurar que la página no se ha cargado tal y 
+        ' como esperábamos...
+        If (valor1 <> -1) Then
+            ' Definimos la posición de la fijación 2 que estára siempre a continuación de la fijación 1
+            Dim valor2 As Integer = strCadena.IndexOf(fijacion2, valor1)
+
+            ' La palabra será la cadena entre la posición de la fijacación 1 + su tamaño y 
+            ' la posición de la fijación 2 menos su tamaño y menos la posición de la fijación1
+            ' Asignamos la palabra parseada a la variable global que guarda la palabra a adivinar
+            strPalabra = strCadena.Substring(valor1 + fijacion1.Length, valor2 - fijacion2.Length - valor1).ToLower
+
+            IniciarJuego()
+        Else
+            MsgBox("No se ha podido generar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
+        End If
+    End Sub
 
 #End Region
 
@@ -474,48 +564,6 @@ Public Class Principal
 
             ' Reiniciamos el juego
             ReiniciarJuego()
-        End If
-    End Sub
-
-    ''' <summary>
-    ''' Evento del webbrowser para cuando ha terminado de cargar una página web
-    ''' </summary>
-    ''' <param name="sender">Objeto que envía el evento</param>
-    ''' <param name="e">Argumentos del evento</param>
-    ''' <remarks></remarks>
-    Private Sub Navegador_DocumentCompleted(sender As Object, e As WebBrowserDocumentCompletedEventArgs) Handles Navegador.DocumentCompleted
-
-        ' Una vez cargada la página, volcamos la estructura de la misma en una cadena
-        Dim cadena As String = Navegador.DocumentText.ToString()
-
-        ' Variables para almacenar los puntos de fijación para el tratamiento de la web
-        Dim fijacion1 As String
-        Dim fijacion2 As String
-
-        ' Definimos los puntos entre los que se encuentra la palabra aleatoria en la página
-        fijacion1 = "<br><font size=" + Chr(34) + "6" + Chr(34) + " /><strong>"
-        fijacion2 = "</strong></font>  </font></p>"
-
-        ' Definimos la posición de la fijación 1
-        Dim valor1 As Integer = cadena.IndexOf(fijacion1)
-
-        ' Verificamos si la página de donde cargamos las nuevas palabras se ha cargado correctamente
-        ' Si no encontramos la primera fijación podemos asegurar que la página no se ha cargado tal y 
-        ' como esperábamos...
-        If (valor1 <> -1) Then
-            ' Definimos la posición de la fijación 2 que estára siempre a continuación de la fijación 1
-            Dim valor2 As Integer = cadena.IndexOf(fijacion2, valor1)
-
-            ' La palabra será la cadena entre la posición de la fijacación 1 + su tamaño y 
-            ' la posición de la fijación 2 menos su tamaño y menos la posición de la fijación1
-            ' Asignamos la palabra parseada a la variable global que guarda la palabra a adivinar
-            strPalabra = cadena.Substring(valor1 + fijacion1.Length, valor2 - fijacion2.Length - valor1).ToLower
-
-            Navegador.Stop()
-
-            IniciarJuego()
-        Else
-            MsgBox("No se ha podido generar la palabra para empezar el juego." + vbCrLf + "Póngase en contacto con el administrardor", MsgBoxStyle.Critical, "Error!")
         End If
     End Sub
 
