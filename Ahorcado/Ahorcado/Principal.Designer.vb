@@ -81,6 +81,7 @@ Partial Class Principal
         '
         'picImagen
         '
+        Me.picImagen.Image = Global.WindowsApplication1.My.Resources.Resources._00
         Me.picImagen.InitialImage = Nothing
         Me.picImagen.Location = New System.Drawing.Point(12, 58)
         Me.picImagen.Name = "picImagen"
