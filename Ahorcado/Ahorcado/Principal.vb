@@ -329,13 +329,24 @@ Public Class Principal
         ' Creamos la variables que almacenará lo que lleva el jugador adivinado de la palabra
         ' iterando los caracteres de la palabra a adivinar e añadiendo el caracter _ por cada posición
         For Each letra As String In strPalabra
-            strPalabraAdivinada = strPalabraAdivinada + "_"
+
+            ' Comprobamos si hay n espacio para introducirlo en la palabra a adivinar
+            If letra = " " Then
+                strPalabraAdivinada = strPalabraAdivinada + " "
+            Else
+                strPalabraAdivinada = strPalabraAdivinada + "_"
+            End If
         Next
 
         ' En el caso del label que muestra la palabra que lleva adivinada el usuario hacemos lo mismo
         ' con un bucle for, pero añadimos _ con un espacio
         For i As Integer = 0 To strPalabraAdivinada.Length - 1
-            lblPalabraDescubierta.Text = lblPalabraDescubierta.Text + "_ "
+            If strPalabraAdivinada.Chars(i) = " " Then
+                lblPalabraDescubierta.Text = lblPalabraDescubierta.Text + "  "
+            Else
+                lblPalabraDescubierta.Text = lblPalabraDescubierta.Text + "_ "
+            End If
+
         Next
 
         ' Cambiamos el estado del juego a continuar
@@ -470,6 +481,11 @@ Public Class Principal
                             If letras = strLetra Then
                                 ' En esa posición del array asignamos el valor de la letra introducida
                                 apoyo(intApoyo) = strLetra
+                            End If
+
+                            ' En el caso de que haya un espacio en blanco, se introduce como respuesta
+                            If letras = " " Then
+                                apoyo(intApoyo) = " "
                             End If
 
                             ' Vamos generando la variable que controla lo que el jugador va adivinando
