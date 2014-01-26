@@ -19,7 +19,7 @@
                     End If
                 Next
 
-                If control = True Then
+                If control = True And sArgs(i) <> 0 Then
                     salida = salida + sArgs(i)
                 End If
 
@@ -29,10 +29,6 @@
             Console.WriteLine("Resultado: " + salida)
 
         End If
-
-
-
-
     End Sub
 
 End Module
