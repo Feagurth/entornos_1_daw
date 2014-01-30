@@ -54,7 +54,7 @@ Public Class Principal
         For Each caracter As Char In strPalabra
             ' Comprobamos si el caracter no se encuentra en la lista de 
             ' caracteres permitidos
-            If ("abcdefghijklmnñopqrstuvwxyz".IndexOf(caracter) = -1) Then
+            If ("abcdefghijklmnñopqrstuvwxyzáéíóúäëïöü".IndexOf(caracter) = -1) Then
                 ' Si no aparece, la palabra tiene caracteres inválidos y se
                 ' devuelve False para descartarla
                 Return False
@@ -301,13 +301,14 @@ Public Class Principal
     End Sub
 
     ''' <summary>
-    ''' Función que nos permite limpiar de acentos y pasar a minúscula la palabra a adivinar
+    ''' Función que nos permite limpiar de acentos, diéresis y pasar a minúscula la palabra a adivinar
     ''' </summary>
     ''' <param name="strValor">Palabra a limpiar</param>
     ''' <returns>Palabra limpia</returns>
     ''' <remarks></remarks>
     Private Function LimpiarPalabra(ByVal strValor)
         strValor = strValor.Replace("á", "a").Replace("é", "e").Replace("í", "i").Replace("ó", "o").Replace("ú", "u")
+        strValor = strValor.Replace("ä", "a").Replace("ë", "e").Replace("ï", "i").Replace("ö", "o").Replace("ü", "u")
 
         Return strValor.ToString().ToLower()
     End Function
